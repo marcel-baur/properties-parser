@@ -1,5 +1,18 @@
+use error::LibError;
+
+mod error;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
+}
+
+pub fn fetch_file(fname: &str) -> Result<(), LibError>{
+    let content = std::fs::read(fname)?;
+    Ok(())
+}
+
+fn parse(bytes: Vec<u8>) {
+    
 }
 
 #[cfg(test)]
