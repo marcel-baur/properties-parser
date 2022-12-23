@@ -1,3 +1,5 @@
+use crate::error::LibError;
+
 #[derive(Debug)]
 pub enum Type {
     Number,
@@ -57,3 +59,40 @@ impl TokenWrapper {
     }
 }
 
+pub enum ContextEntry {
+    StringValue(String),
+    NumberValue(i64),
+    Nested(Box<ContextEntry>),
+}
+
+pub struct ParsedFile {
+    pub entries: Vec<ContextEntry>
+}
+
+impl ParsedFile {
+    fn new() -> Self {
+        Self {
+            entries: Vec::new()
+        }
+    }
+}
+
+pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
+    let mut index = 0;
+    let mut parsed_file = ParsedFile::new();
+
+    while index < tokens.len(){
+        let token = &tokens[index];
+        // TODO: differentiate between key and value during lexing
+        match token {
+            TokenWrapper { content: Token::Eol, .. } => { index += 1 }
+            TokenWrapper { content: Token::Eof, .. } => { break; }
+            
+            TokenWrapper { span, .. } => {
+                return Err(LibError::ParserError("unexpected token".to_string(), span));
+            }
+        }
+    }
+
+    return Ok(parsed_file);
+}
