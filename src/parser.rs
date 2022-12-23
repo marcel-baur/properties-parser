@@ -91,7 +91,19 @@ pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
         let token = &tokens[index];
         // TODO: differentiate between key and value during lexing
         match token {
-            TokenWrapper { content: Token::Eol, .. } => { index += 1 }
+            TokenWrapper { content: Token::Eol, .. } => { 
+                index += 1; 
+                parsing_state = ParsingState::Key;
+            }
+            TokenWrapper { content: Token::Equals, .. } => {
+                // This might not be necessary because it's done in parse_entry
+                index += 1;
+                parsing_state = ParsingState::Value;
+            }
+            TokenWrapper { content: Token::String(value), span, } => {
+                // This handles the entire entry until the Eol
+                let content_entry = parse_entry(tokens, &mut index);
+            }
             TokenWrapper { content: Token::Eof, .. } => { break; }
             
             TokenWrapper { span, .. } => {
@@ -101,4 +113,8 @@ pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
     }
 
     return Ok(parsed_file);
+}
+
+fn parse_entry(tokens: &[TokenWrapper], index: &mut usize) -> Option<ContextEntry> {
+    todo!()
 }
