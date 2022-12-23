@@ -77,9 +77,15 @@ impl ParsedFile {
     }
 }
 
+pub enum ParsingState {
+    Key,
+    Value,
+}
+
 pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
     let mut index = 0;
     let mut parsed_file = ParsedFile::new();
+    let mut parsing_state = ParsingState::Key;
 
     while index < tokens.len(){
         let token = &tokens[index];
