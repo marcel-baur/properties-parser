@@ -1,7 +1,7 @@
 use crate::error::LibError;
 use crate::parser::{TokenWrapper, Token, Span};
 
-pub fn lex(bytes: Vec<u8>) -> (Vec<TokenWrapper>, Option<LibError>) {
+pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
     let mut index = 0;
     // let mut error = None;
     let mut output = Vec::new();
@@ -34,18 +34,18 @@ pub fn lex(bytes: Vec<u8>) -> (Vec<TokenWrapper>, Option<LibError>) {
             }
             _ => {
                 // TODO: consume token
-                let (token, err) = lex_item(&bytes, &mut index);
-                error = error.or(err);
-                output.push(token);
+                let token = match lex_item(&bytes, &mut index) {
+                    Ok(t) => output.push(t),
+                    Err(e) => output.push(TokenWrapper::new(Token::Garbage, Span::new(index, index + 1)))
+                };
             }
-        }
+        };
     }
     output.push(TokenWrapper { content: Token::Eof, span: Span::new(index, index) });
-    return (output, error);
+    return Ok(output);
 }
 
-fn lex_item(bytes: &[u8], index: &mut usize) -> (TokenWrapper, Option<LibError>) {
-    let mut error = None;
+fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
 
     if bytes[*index].is_ascii_digit() {
         let start = *index;
@@ -57,10 +57,11 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> (TokenWrapper, Option<LibError>)
         let number: Result<i64, _> = str.parse();
 
         return match number {
-            Ok(num) => (TokenWrapper::new(Token::Number(num), Span::new(start, *index)), None),
-            Err(_) => (TokenWrapper::ukn(Span::new(start, *index)), Some(LibError::ParserError("could not parse to number".to_string(), Span::new(start, *index))))
+            Ok(num) => Ok(TokenWrapper::new(Token::Number(num), Span::new(start, *index))),
+            Err(_) => Err(LibError::ParserError("could not parse to number".to_string(), Span::new(start, *index)))
         };
-    } else if bytes[*index].is_ascii_alphabetic() {
+    } 
+    if bytes[*index].is_ascii_alphabetic() {
         let start = *index;
         *index += 1;
         
@@ -69,12 +70,11 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> (TokenWrapper, Option<LibError>)
         }
         let str = String::from_utf8_lossy(&bytes[start..*index]);
         // TODO: check Token Type for designator
-        return (TokenWrapper::new(Token::String(str.to_string()), Span::new(start, *index)), error);
-    } else {
-        let span = Span::new(*index, *index + 1);
-        error = error.or(Some(LibError::ParserError("unkown character".to_string(), span)));
-        *index += 1;
-        return (TokenWrapper::ukn(span), error);
-    }
+        return Ok(TokenWrapper::new(Token::String(str.to_string()), Span::new(start, *index)));
+    } 
+    let span = Span::new(*index, *index + 1);
+    // error = error.or(Some(LibError::ParserError("unkown character".to_string(), span)));
+    *index += 1;
+    Err(LibError::ParserError("unknown character".to_string(), span))
 }
-
+        

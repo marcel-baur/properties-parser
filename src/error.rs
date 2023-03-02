@@ -1,3 +1,5 @@
+use crate::parser::Span;
+
 #[derive(Debug)]
 pub enum LibError {
     ParserError(String, Span),

@@ -22,6 +22,7 @@ impl Variable {
 }
 
 
+#[derive(Debug)]
 pub enum Token {
     String(String),
     Number(i64),
@@ -33,6 +34,7 @@ pub enum Token {
     Garbage,
 }
 
+#[derive(Debug, Clone)]
 pub struct Span {
     pub start: usize,
     pub end: usize,
@@ -44,6 +46,7 @@ impl Span {
     }
 }
 
+#[derive(Debug)]
 pub struct TokenWrapper {
     pub content: Token,
     pub span: Span,
@@ -107,7 +110,7 @@ pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
             TokenWrapper { content: Token::Eof, .. } => { break; }
             
             TokenWrapper { span, .. } => {
-                return Err(LibError::ParserError("unexpected token".to_string(), span));
+                return Err(LibError::ParserError("unexpected token".to_string(), span.clone()));
             }
         }
     }
