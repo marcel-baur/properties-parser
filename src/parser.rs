@@ -11,6 +11,7 @@ pub enum Token {
     Eol,
     Eof,
     Garbage,
+    Space,
 }
 
 #[derive(Debug, Clone)]
@@ -113,6 +114,7 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
                 // TODO: maybe reset key, value
             },
             Token::Eof => return Ok(props),
+            Token::Space => continue,
             Token::Garbage => {
                 println!("Bad token, skipping it");
                 continue;

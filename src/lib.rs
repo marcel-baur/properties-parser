@@ -1,4 +1,5 @@
 use error::LibError;
+use parser::Entry;
 
 mod error;
 mod lexer;
@@ -8,13 +9,10 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
-pub fn fetch_file(fname: &str) -> Result<(), LibError>{
+pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError>{
     let content = std::fs::read(fname)?;
     let lexed = lexer::lex(content);
-    println!("{:?}", lexed);
-    let parsed = parser::parse_file(lexed.unwrap());
-    println!("{:?}", parsed);
-    Ok(())
+    return parser::parse_file(lexed.unwrap());
 }
 
 #[cfg(test)]

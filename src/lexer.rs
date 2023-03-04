@@ -30,6 +30,11 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
                     TokenWrapper::new(Token::Eol, Span::new(start, start + 1))
                 );
             }
+            b' ' => {
+                let start = index;
+                index += 1;
+                output.push(TokenWrapper::new(Token::Space, Span::new(start, start + 1)));
+            }
             _ => {
                 // TODO: consume token
                 match lex_item(&bytes, &mut index) {
