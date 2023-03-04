@@ -1,9 +1,8 @@
-use linked_hash_map::LinkedHashMap;
-
 use crate::error::LibError;
 
 #[derive(Debug)]
 pub enum Token {
+    //TODO: implement token for Space character. Currently handled as Garbage
     String(String),
     Number(i64),
     CommentSign, 
@@ -42,16 +41,18 @@ impl TokenWrapper {
     }
 }
 
-pub type Hash = LinkedHashMap<Property, Property>;
 
-pub type Entry = (Property, Property);
+pub type Entry = (Key, Value);
 
-pub enum Property {
-    Real(String),
+#[derive(Debug, Clone)]
+pub enum Value {
+    //Real(String),
     Integer(i64),
     Null,
-    Hash(self::Hash),
+    String(String),
 }
+
+pub type Key = Vec<String>;
 
 enum ParsingState {
     Key,
@@ -60,8 +61,8 @@ enum ParsingState {
 
 pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
     let mut props = Vec::new();
-    let mut current_key = Property::Null;
-    let mut current_value = Property::Null;
+    let mut current_key = Vec::new();
+    let mut current_value = Value::Null;
     let mut parsing_state = ParsingState::Key;
     let mut is_comment_line = false;
     for token in tokens {
@@ -77,31 +78,42 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
         match token.content {
             Token::String(val) => {
                 match parsing_state {
-                    ParsingState::Key => {},
-                    ParsingState::Value => {},
+                    ParsingState::Key => {
+                        current_key.push(val);
+                    },
+                    ParsingState::Value => {
+                        current_value = Value::String(val);
+                    },
                 };
             },
             Token::Number(val) => {
                 match parsing_state {
-                    ParsingState::Key => {},
-                    ParsingState::Value => {},
+                    ParsingState::Key => {
+                        current_key.push(val.to_string());
+                    },
+                    ParsingState::Value => {
+                        current_value = Value::Integer(val);
+                    },
                 };
             },
             Token::CommentSign => continue,
-            Token::Dot => {
+            Token::Equals => {
                 match parsing_state {
                     ParsingState::Key => parsing_state = ParsingState::Value,
                     ParsingState::Value => parsing_state = ParsingState::Key,
                 };
             },
-            Token::Equals => continue,
+            Token::Dot => continue,
             Token::Eol => {
                 parsing_state = ParsingState::Key;
-                props.push((current_key, current_value));
+                props.push((current_key.clone(), current_value.clone()));
                 // TODO: maybe reset key, value
             },
             Token::Eof => return Ok(props),
-            Token::Garbage => return Err(LibError::ParserError("Bad item in TokenWrapper!".to_string())),
+            Token::Garbage => {
+                println!("Bad token, skipping it");
+                continue;
+            },
         };
     }
 

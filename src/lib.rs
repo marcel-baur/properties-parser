@@ -12,6 +12,8 @@ pub fn fetch_file(fname: &str) -> Result<(), LibError>{
     let content = std::fs::read(fname)?;
     let lexed = lexer::lex(content);
     println!("{:?}", lexed);
+    let parsed = parser::parse_file(lexed.unwrap());
+    println!("{:?}", parsed);
     Ok(())
 }
 

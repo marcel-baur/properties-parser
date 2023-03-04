@@ -36,7 +36,7 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
                     Ok(t) => output.push(t),
                     Err(e) => {
                         match e {
-                            LibError::ParserError(_m, s) => output.push(TokenWrapper::ukn(s)),
+                            LibError::LexError(_m, s) => output.push(TokenWrapper::ukn(s)),
                             _ => {
                                 return Err(e);
                             }
@@ -63,7 +63,7 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
 
         return match number {
             Ok(num) => Ok(TokenWrapper::new(Token::Number(num), Span::new(start, *index))),
-            Err(_) => Err(LibError::ParserError("could not parse to number".to_string(), Span::new(start, *index)))
+            Err(_) => Err(LibError::LexError("could not parse to number".to_string(), Span::new(start, *index)))
         };
     } 
     if bytes[*index].is_ascii_alphabetic() {
@@ -80,6 +80,6 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
     let span = Span::new(*index, *index + 1);
     // error = error.or(Some(LibError::ParserError("unkown character".to_string(), span)));
     *index += 1;
-    Err(LibError::ParserError("unknown character".to_string(), span))
+    Err(LibError::LexError("unknown character".to_string(), span))
 }
         
