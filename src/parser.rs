@@ -96,7 +96,10 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
                     },
                 };
             },
-            Token::CommentSign => continue,
+            Token::CommentSign => {
+                is_comment_line = true;
+                continue;
+            }
             Token::Equals => {
                 match parsing_state {
                     ParsingState::Key => parsing_state = ParsingState::Value,
