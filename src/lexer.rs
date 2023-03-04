@@ -3,9 +3,7 @@ use crate::parser::{TokenWrapper, Token, Span};
 
 pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
     let mut index = 0;
-    // let mut error = None;
     let mut output = Vec::new();
-    let mut error: Option<LibError> = None;
 
     while index < bytes.len() {
         let c = bytes[index];
@@ -34,9 +32,16 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
             }
             _ => {
                 // TODO: consume token
-                let token = match lex_item(&bytes, &mut index) {
+                match lex_item(&bytes, &mut index) {
                     Ok(t) => output.push(t),
-                    Err(e) => output.push(TokenWrapper::new(Token::Garbage, Span::new(index, index + 1)))
+                    Err(e) => {
+                        match e {
+                            LibError::ParserError(_m, s) => output.push(TokenWrapper::ukn(s)),
+                            _ => {
+                                return Err(e);
+                            }
+                        };
+                    }
                 };
             }
         };

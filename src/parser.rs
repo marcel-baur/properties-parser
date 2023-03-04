@@ -1,26 +1,6 @@
+use linked_hash_map::LinkedHashMap;
+
 use crate::error::LibError;
-
-#[derive(Debug)]
-pub enum Type {
-    Number,
-    String,
-    Void,
-}
-
-pub struct Variable {
-    pub name: String,
-    pub ty: Type,
-}
-
-impl Variable {
-    pub fn new() -> Self {
-        Self { 
-            name: String::new(),
-            ty: Type::Void,
-        }
-    }
-}
-
 
 #[derive(Debug)]
 pub enum Token {
@@ -62,62 +42,68 @@ impl TokenWrapper {
     }
 }
 
-pub enum ContextEntry {
-    StringValue(String),
-    NumberValue(i64),
-    Nested(Box<ContextEntry>),
+pub type Hash = LinkedHashMap<Property, Property>;
+
+pub type Entry = (Property, Property);
+
+pub enum Property {
+    Real(String),
+    Integer(i64),
+    Null,
+    Hash(self::Hash),
 }
 
-pub struct ParsedFile {
-    pub entries: Vec<ContextEntry>
-}
-
-impl ParsedFile {
-    fn new() -> Self {
-        Self {
-            entries: Vec::new()
-        }
-    }
-}
-
-pub enum ParsingState {
+enum ParsingState {
     Key,
     Value,
 }
 
-pub fn parse_file(tokens: &[TokenWrapper]) -> Result<ParsedFile, LibError> {
-    let mut index = 0;
-    let mut parsed_file = ParsedFile::new();
+pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
+    let mut props = Vec::new();
+    let mut current_key = Property::Null;
+    let mut current_value = Property::Null;
     let mut parsing_state = ParsingState::Key;
-
-    while index < tokens.len(){
-        let token = &tokens[index];
-        // TODO: differentiate between key and value during lexing
-        match token {
-            TokenWrapper { content: Token::Eol, .. } => { 
-                index += 1; 
-                parsing_state = ParsingState::Key;
-            }
-            TokenWrapper { content: Token::Equals, .. } => {
-                // This might not be necessary because it's done in parse_entry
-                index += 1;
-                parsing_state = ParsingState::Value;
-            }
-            TokenWrapper { content: Token::String(value), span, } => {
-                // This handles the entire entry until the Eol
-                let content_entry = parse_entry(tokens, &mut index);
-            }
-            TokenWrapper { content: Token::Eof, .. } => { break; }
-            
-            TokenWrapper { span, .. } => {
-                return Err(LibError::ParserError("unexpected token".to_string(), span.clone()));
-            }
+    let mut is_comment_line = false;
+    for token in tokens {
+        if is_comment_line {
+            match token.content {
+                Token::Eol => {
+                    is_comment_line = false;
+                    continue;
+                },
+                _ => continue,
+            };
         }
+        match token.content {
+            Token::String(val) => {
+                match parsing_state {
+                    ParsingState::Key => {},
+                    ParsingState::Value => {},
+                };
+            },
+            Token::Number(val) => {
+                match parsing_state {
+                    ParsingState::Key => {},
+                    ParsingState::Value => {},
+                };
+            },
+            Token::CommentSign => continue,
+            Token::Dot => {
+                match parsing_state {
+                    ParsingState::Key => parsing_state = ParsingState::Value,
+                    ParsingState::Value => parsing_state = ParsingState::Key,
+                };
+            },
+            Token::Equals => continue,
+            Token::Eol => {
+                parsing_state = ParsingState::Key;
+                props.push((current_key, current_value));
+                // TODO: maybe reset key, value
+            },
+            Token::Eof => return Ok(props),
+            Token::Garbage => return Err(LibError::ParserError("Bad item in TokenWrapper!".to_string())),
+        };
     }
 
-    return Ok(parsed_file);
-}
-
-fn parse_entry(tokens: &[TokenWrapper], index: &mut usize) -> Option<ContextEntry> {
-    todo!()
+    return Ok(props);
 }

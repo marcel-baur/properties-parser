@@ -2,7 +2,8 @@ use crate::parser::Span;
 
 #[derive(Debug)]
 pub enum LibError {
-    ParserError(String, Span),
+    LexError(String, Span),
+    ParserError(String),
     IOError(std::io::Error)
 }
 
