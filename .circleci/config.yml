@@ -19,6 +19,11 @@ jobs:
           name: "Run tests"
           command: "cargo test"
 
+general:
+  branches:
+    only:
+      - main
+      - develop
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
