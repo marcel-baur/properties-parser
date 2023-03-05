@@ -17,11 +17,25 @@ pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError>{
 
 #[cfg(test)]
 mod tests {
+    use crate::parser::Value;
+
     use super::*;
 
     #[test]
     fn it_works() {
         let result = add(2, 2);
         assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn correctly_parses_basic_file() {
+        
+        let res = fetch_file("res/demo.properties").unwrap();
+        let mut ex_vec: Vec<String> = Vec::new();
+        for el in ["this", "is", "a"] {
+            ex_vec.push(el.to_string());
+        }
+        let expect = [(ex_vec, Value::String("prop".to_string()))];
+        assert_eq!(res, expect);
     }
 }

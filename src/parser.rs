@@ -45,7 +45,7 @@ impl TokenWrapper {
 
 pub type Entry = (Key, Value);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     //Real(String),
     Integer(i64),
