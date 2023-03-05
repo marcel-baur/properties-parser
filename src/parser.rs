@@ -2,7 +2,6 @@ use crate::error::LibError;
 
 #[derive(Debug)]
 pub enum Token {
-    //TODO: implement token for Space character. Currently handled as Garbage
     String(String),
     Number(i64),
     CommentSign, 
@@ -42,9 +41,13 @@ impl TokenWrapper {
     }
 }
 
-
+/// Represents an entry of a `.properties` file
+///
+/// # Example
+/// this.is.an = example
 pub type Entry = (Key, Value);
 
+/// Represents a possible Value of a `.properties` file entry.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     //Real(String),
@@ -60,6 +63,11 @@ enum ParsingState {
     Value,
 }
 
+/// Returns the result of parsing a lexed `.properties` file.
+/// 
+/// # Arguments
+///
+/// * `tokens` - A `Vec` of `TokenWrapper`s representing a lexed file
 pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
     let mut props = Vec::new();
     let mut current_key = Vec::new();

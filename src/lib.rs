@@ -9,6 +9,16 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
+/// Fetch a `.properties` file from a provided path and parse it
+///
+/// # Arguments
+///
+/// * `fname` - Path of the file that shall be parsed
+///
+/// # Returns
+///
+/// * on success: `Vec<Entry>` of the file
+/// * on failiure: `LibError`
 pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError>{
     let content = std::fs::read(fname)?;
     let lexed = lexer::lex(content);
