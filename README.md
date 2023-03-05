@@ -8,5 +8,13 @@ file.
 
 An `Entry` provides the following data structure:
 ```
+pub type Entry = (Key, Value);
+pub type Key = Vec<String>;
+
+pub enum Value {
+    Integer(i64),
+    Null,
+    String(String),
+}
 
 ```
