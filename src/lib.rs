@@ -5,10 +5,6 @@ mod error;
 mod lexer;
 mod parser;
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
 /// Fetch a `.properties` file from a provided path and parse it
 ///
 /// # Arguments
@@ -30,12 +26,6 @@ mod tests {
     use crate::parser::Value;
 
     use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
 
     #[test]
     fn correctly_parses_basic_file() {
