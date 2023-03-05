@@ -3,7 +3,7 @@ use parser::Entry;
 
 mod error;
 mod lexer;
-mod parser;
+pub mod parser;
 
 /// Fetch a `.properties` file from a provided path and parse it
 ///
