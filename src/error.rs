@@ -4,7 +4,7 @@ use crate::parser::Span;
 pub enum LibError {
     LexError(String, Span),
     ParserError(String),
-    IOError(std::io::Error)
+    IOError(std::io::Error),
 }
 
 impl From<std::io::Error> for LibError {
