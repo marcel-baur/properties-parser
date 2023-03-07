@@ -66,6 +66,23 @@ enum ParsingState {
     Value,
 }
 
+fn update_current_value(current_value: &Value, character: char) -> Value {
+    match current_value {
+        Value::Null => return Value::String(character.to_string()),
+        Value::String(s) => {
+            return Value::String({
+                let ref mut this = s.clone();
+                this.push(character);
+                this.to_string()
+            })
+        }
+        _ => {
+            // TODO: fix this for other types. Not used for now
+            return Value::Null;
+        }
+    }
+}
+
 /// Returns the result of parsing a lexed `.properties` file.
 ///
 /// # Arguments
@@ -125,24 +142,16 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
             Token::Equals => {
                 match parsing_state {
                     ParsingState::Key => parsing_state = ParsingState::Value,
-                    ParsingState::Value => parsing_state = ParsingState::Key,
+                    ParsingState::Value => {
+                        current_value = update_current_value(&current_value, '=');
+                    }
                 };
             }
             Token::Dot => {
                 match parsing_state {
                     ParsingState::Key => continue,
                     ParsingState::Value => {
-                        match current_value {
-                            Value::Null => current_value = Value::String(".".to_string()),
-                            Value::String(s) => {
-                                current_value = Value::String({
-                                    let ref mut this = s.clone();
-                                    this.push('.');
-                                    this.to_string()
-                                })
-                            }
-                            _ => {}
-                        };
+                        current_value = update_current_value(&current_value, '.');
                     }
                 };
             }
@@ -153,7 +162,12 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
                 current_key = Vec::new();
                 current_value = Value::Null;
             }
-            Token::Eof => return Ok(props),
+            Token::Eof => {
+                if !current_key.is_empty() {
+                    props.push((current_key.clone(), current_value.clone()));
+                }
+                return Ok(props)
+            },
             Token::Space => continue,
             Token::Garbage => {
                 println!("Bad token, skipping it");

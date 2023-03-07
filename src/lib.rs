@@ -27,6 +27,46 @@ mod tests {
 
     use super::*;
 
+    fn generate_result_prop(key: String, value: String) -> parser::Entry {
+        return (key.split(".").map(|e| e.to_string()).collect(), Value::String(value));
+    }
+
+    #[test]
+    fn parses_basic_entry() {
+        let obj = "this.is.a = prop".as_bytes();
+        let expected = vec![generate_result_prop("this.is.a".to_string(), "prop".to_string())];
+        let lexed = lexer::lex(obj.to_vec()).unwrap();
+        let parsed = parser::parse_file(lexed);
+        assert_eq!(parsed.unwrap(), expected);
+    }
+
+    #[test]
+    fn parses_mixed_entry() {
+        let obj = "this.is.a = m1x3d3ntry".as_bytes();
+        let expected = vec![generate_result_prop("this.is.a".to_string(), "m1x3d3ntry".to_string())];
+        let lexed = lexer::lex(obj.to_vec()).unwrap();
+        let parsed = parser::parse_file(lexed);
+        assert_eq!(parsed.unwrap(), expected);
+    }
+
+    #[test]
+    fn parses_url_entry() {
+        let obj = "this.is.a = http://www.google.com/abcd?prop=prop".as_bytes();
+        let expected = vec![generate_result_prop("this.is.a".to_string(), "http://www.google.com/abcd?prop=prop".to_string())];
+        let lexed = lexer::lex(obj.to_vec()).unwrap();
+        let parsed = parser::parse_file(lexed);
+        assert_eq!(parsed.unwrap(), expected);
+    }
+
+    #[test]
+    fn parses_entry_with_hash() {
+        let obj = "this.is.a = entry#has#hash".as_bytes();
+        let expected = vec![generate_result_prop("this.is.a".to_string(), "entry#has#hash".to_string())];
+        let lexed = lexer::lex(obj.to_vec()).unwrap();
+        let parsed = parser::parse_file(lexed);
+        assert_eq!(parsed.unwrap(), expected);
+    }
+
     #[test]
     fn correctly_parses_basic_file() {
         let res = fetch_file("res/demo.properties").unwrap();
