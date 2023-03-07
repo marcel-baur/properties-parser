@@ -1,16 +1,30 @@
 use crate::error::LibError;
 use crate::parser::{Span, Token, TokenWrapper};
 
+fn lower_bound_zero(num: &usize) -> usize {
+    if *num > 0 { 
+        return num - 1;
+    }
+    return 0;
+}
+
 pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
     let mut index = 0;
     let mut output = Vec::new();
 
     while index < bytes.len() {
         let c = bytes[index];
+        let prev = bytes[lower_bound_zero(&index)];
         match c {
             b'#' => {
                 let start = index;
                 index += 1;
+                if prev != b'\n' && index != 1{
+                    match handle_regular_character(&bytes, &mut index, &mut output) {
+                        Ok(_) => continue,
+                        Err(e) => return Err(e)
+                    };
+                }
                 output.push(TokenWrapper::new(
                     Token::CommentSign,
                     Span::new(start, start + 1),
@@ -41,16 +55,9 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
             }
             _ => {
                 // TODO: consume token
-                match lex_item(&bytes, &mut index) {
-                    Ok(t) => output.push(t),
-                    Err(e) => {
-                        match e {
-                            LibError::LexError(_m, s) => output.push(TokenWrapper::ukn(s)),
-                            _ => {
-                                return Err(e);
-                            }
-                        };
-                    }
+                match handle_regular_character(&bytes, &mut index, &mut output) {
+                    Ok(_) => continue,
+                    Err(e) => return Err(e)
                 };
             }
         };
@@ -62,15 +69,31 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
     return Ok(output);
 }
 
+fn handle_regular_character(bytes: &[u8], index: &mut usize, output: &mut Vec<TokenWrapper>) -> Result<(), LibError> {
+    match lex_item(&bytes, index) {
+        Ok(t) => output.push(t),
+        Err(e) => {
+            match e {
+                LibError::LexError(_m, s) => output.push(TokenWrapper::ukn(s)),
+                _ => {
+                    return Err(e);
+                }
+            };
+        }
+    };
+    Ok(())
+}
+
 fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
     if bytes[*index].is_ascii() {
         let start = *index;
         *index += 1;
 
-        while *index < bytes.len() && (bytes[*index].is_ascii_alphanumeric()) {
+        while *index < bytes.len() && (bytes[*index].is_ascii_alphanumeric() || bytes[*index] == b'#') {
             *index += 1;
         }
         let str = String::from_utf8_lossy(&bytes[start..*index]);
+        println!("{str}");
         // TODO: check Token Type for designator
         return Ok(TokenWrapper::new(
             Token::String(str.to_string()),

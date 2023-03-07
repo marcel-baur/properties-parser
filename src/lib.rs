@@ -45,6 +45,7 @@ mod tests {
             ),
             (vec!["num".to_string()], Value::String("123".to_string())),
             (vec!["mix".to_string()], Value::String("ab33s".to_string())),
+            (vec!["has".to_string(), "a".to_string(), "hash".to_string()], Value::String("has#hash".to_string())),
         ];
         // let expect = [(ex_vec, Value::String("prop".to_string()))];
         assert_eq!(res, exp);

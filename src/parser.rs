@@ -53,7 +53,7 @@ pub type Entry = (Key, Value);
 /// Represents a possible Value of a `.properties` file entry.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    //Real(String),
+    // Real(String),
     Integer(i64),
     Null,
     String(String),
