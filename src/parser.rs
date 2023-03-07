@@ -98,7 +98,7 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
                             Value::Null => current_value = Value::String(val),
                             Value::String(s) => {
                                 current_value = Value::String({
-                                    let ref mut this = s.clone();
+                                    let this = &mut s.clone();
                                     this.push_str(&val);
                                     this.to_string()
                                 })
@@ -137,7 +137,7 @@ pub fn parse_file(tokens: Vec<TokenWrapper>) -> Result<Vec<Entry>, LibError> {
                             Value::String(s) => {
                                 current_value = Value::String({
                                     let ref mut this = s.clone();
-                                    this.push_str(".");
+                                    this.push('.');
                                     this.to_string()
                                 })
                             }

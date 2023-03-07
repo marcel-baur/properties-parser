@@ -70,7 +70,7 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
 }
 
 fn handle_regular_character(bytes: &[u8], index: &mut usize, output: &mut Vec<TokenWrapper>) -> Result<(), LibError> {
-    match lex_item(&bytes, index) {
+    match lex_item(bytes, index) {
         Ok(t) => output.push(t),
         Err(e) => {
             match e {
