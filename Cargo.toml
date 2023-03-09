@@ -1,6 +1,6 @@
 [package]
 name = "propparse"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 description = "A library to parse .properties files"
 license = "MIT OR Apache-2.0"

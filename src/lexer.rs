@@ -93,7 +93,6 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
             *index += 1;
         }
         let str = String::from_utf8_lossy(&bytes[start..*index]);
-        println!("{str}");
         // TODO: check Token Type for designator
         return Ok(TokenWrapper::new(
             Token::String(str.to_string()),
