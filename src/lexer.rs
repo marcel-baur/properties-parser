@@ -1,8 +1,8 @@
 use crate::error::LibError;
-use crate::parser::{Span, Token, TokenWrapper};
+use crate::types::{Token, TokenWrapper, Span};
 
 fn lower_bound_zero(num: &usize) -> usize {
-    if *num > 0 { 
+    if *num > 0 {
         return num - 1;
     }
     return 0;
@@ -19,10 +19,10 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
             b'#' => {
                 let start = index;
                 index += 1;
-                if prev != b'\n' && index != 1{
+                if prev != b'\n' && index != 1 {
                     match handle_regular_character(&bytes, &mut index, &mut output) {
                         Ok(_) => continue,
-                        Err(e) => return Err(e)
+                        Err(e) => return Err(e),
                     };
                 }
                 output.push(TokenWrapper::new(
@@ -57,7 +57,7 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
                 // TODO: consume token
                 match handle_regular_character(&bytes, &mut index, &mut output) {
                     Ok(_) => continue,
-                    Err(e) => return Err(e)
+                    Err(e) => return Err(e),
                 };
             }
         };
@@ -69,7 +69,11 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
     return Ok(output);
 }
 
-fn handle_regular_character(bytes: &[u8], index: &mut usize, output: &mut Vec<TokenWrapper>) -> Result<(), LibError> {
+fn handle_regular_character(
+    bytes: &[u8],
+    index: &mut usize,
+    output: &mut Vec<TokenWrapper>,
+) -> Result<(), LibError> {
     match lex_item(bytes, index) {
         Ok(t) => output.push(t),
         Err(e) => {
@@ -89,7 +93,9 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
         let start = *index;
         *index += 1;
 
-        while *index < bytes.len() && (bytes[*index].is_ascii_alphanumeric() || bytes[*index] == b'#') {
+        while *index < bytes.len()
+            && (bytes[*index].is_ascii_alphanumeric() || bytes[*index] == b'#')
+        {
             *index += 1;
         }
         let str = String::from_utf8_lossy(&bytes[start..*index]);

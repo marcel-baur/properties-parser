@@ -1,9 +1,10 @@
 use error::LibError;
-use parser::Entry;
+use types::Entry;
 
 mod error;
 mod lexer;
 pub mod parser;
+pub mod types;
 
 /// Fetch a `.properties` file from a provided path and parse it
 ///
@@ -23,18 +24,31 @@ pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::Value;
+    use crate::types::Value;
 
     use super::*;
 
-    fn generate_result_prop(key: String, value: String) -> parser::Entry {
-        return (key.split(".").map(|e| e.to_string()).collect(), Value::String(value));
+    fn generate_result_prop(key: String, value: String) -> types::Entry {
+        return (
+            key.split(".").map(|e| e.to_string()).collect(),
+            Value::String(value),
+        );
+    }
+
+    #[test]
+    fn content_tree() {
+        let res = fetch_file("res/demo.properties").unwrap();
+        // let tree = parser::create_content_tree(res);
+        assert_eq!(1, 1);
     }
 
     #[test]
     fn parses_basic_entry() {
         let obj = "this.is.a = prop".as_bytes();
-        let expected = vec![generate_result_prop("this.is.a".to_string(), "prop".to_string())];
+        let expected = vec![generate_result_prop(
+            "this.is.a".to_string(),
+            "prop".to_string(),
+        )];
         let lexed = lexer::lex(obj.to_vec()).unwrap();
         let parsed = parser::parse_file(lexed);
         assert_eq!(parsed.unwrap(), expected);
@@ -43,7 +57,10 @@ mod tests {
     #[test]
     fn parses_mixed_entry() {
         let obj = "this.is.a = m1x3d3ntry".as_bytes();
-        let expected = vec![generate_result_prop("this.is.a".to_string(), "m1x3d3ntry".to_string())];
+        let expected = vec![generate_result_prop(
+            "this.is.a".to_string(),
+            "m1x3d3ntry".to_string(),
+        )];
         let lexed = lexer::lex(obj.to_vec()).unwrap();
         let parsed = parser::parse_file(lexed);
         assert_eq!(parsed.unwrap(), expected);
@@ -52,7 +69,10 @@ mod tests {
     #[test]
     fn parses_url_entry() {
         let obj = "this.is.a = http://www.google.com/abcd?prop=prop".as_bytes();
-        let expected = vec![generate_result_prop("this.is.a".to_string(), "http://www.google.com/abcd?prop=prop".to_string())];
+        let expected = vec![generate_result_prop(
+            "this.is.a".to_string(),
+            "http://www.google.com/abcd?prop=prop".to_string(),
+        )];
         let lexed = lexer::lex(obj.to_vec()).unwrap();
         let parsed = parser::parse_file(lexed);
         assert_eq!(parsed.unwrap(), expected);
@@ -61,7 +81,10 @@ mod tests {
     #[test]
     fn parses_entry_with_hash() {
         let obj = "this.is.a = entry#has#hash".as_bytes();
-        let expected = vec![generate_result_prop("this.is.a".to_string(), "entry#has#hash".to_string())];
+        let expected = vec![generate_result_prop(
+            "this.is.a".to_string(),
+            "entry#has#hash".to_string(),
+        )];
         let lexed = lexer::lex(obj.to_vec()).unwrap();
         let parsed = parser::parse_file(lexed);
         assert_eq!(parsed.unwrap(), expected);
@@ -85,7 +108,10 @@ mod tests {
             ),
             (vec!["num".to_string()], Value::String("123".to_string())),
             (vec!["mix".to_string()], Value::String("ab33s".to_string())),
-            (vec!["has".to_string(), "a".to_string(), "hash".to_string()], Value::String("has#hash".to_string())),
+            (
+                vec!["has".to_string(), "a".to_string(), "hash".to_string()],
+                Value::String("has#hash".to_string()),
+            ),
         ];
         // let expect = [(ex_vec, Value::String("prop".to_string()))];
         assert_eq!(res, exp);

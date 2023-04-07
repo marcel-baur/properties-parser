@@ -1,4 +1,4 @@
-use crate::parser::Span;
+use crate::types::Span;
 
 #[derive(Debug)]
 pub enum LibError {
