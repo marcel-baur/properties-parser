@@ -3,7 +3,7 @@ use types::Entry;
 
 mod error;
 mod lexer;
-pub mod parser;
+mod parser;
 pub mod types;
 
 /// Fetch a `.properties` file from a provided path and parse it
@@ -17,6 +17,22 @@ pub mod types;
 /// * on success: `Vec<Entry>` of the file
 /// * on failiure: `LibError`
 pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError> {
+    let content = std::fs::read(fname)?;
+    let lexed = lexer::lex(content);
+    return parser::parse_file(lexed.unwrap());
+}
+
+/// Fetch a `.properties` file from a provided path and parse it
+///
+/// # Arguments
+///
+/// * `fname` - Path of the file that shall be parsed
+///
+/// # Returns
+///
+/// * on success: `Vec<Entry>` of the file
+/// * on failiure: `LibError`
+pub fn parse_file(fname: &str) -> Result<Vec<Entry>, LibError> {
     let content = std::fs::read(fname)?;
     let lexed = lexer::lex(content);
     return parser::parse_file(lexed.unwrap());
