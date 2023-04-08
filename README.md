@@ -3,7 +3,9 @@
 
 A library to parse `.properties` files.
 
-Use the published `fetch_file` function to parse a file from the given path.
+Types are defined in the `types` module.
+
+Use the published `parse_file` function to parse a file from the given path.
 On success, it returns a `Vec<Entry>`, which contains all entries in the provided
 file.
 
