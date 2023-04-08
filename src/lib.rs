@@ -16,6 +16,7 @@ pub mod types;
 ///
 /// * on success: `Vec<Entry>` of the file
 /// * on failiure: `LibError`
+#[deprecated]
 pub fn fetch_file(fname: &str) -> Result<Vec<Entry>, LibError> {
     let content = std::fs::read(fname)?;
     let lexed = lexer::lex(content);
@@ -49,13 +50,6 @@ mod tests {
             key.split(".").map(|e| e.to_string()).collect(),
             Value::String(value),
         );
-    }
-
-    #[test]
-    fn content_tree() {
-        let res = fetch_file("res/demo.properties").unwrap();
-        // let tree = parser::create_content_tree(res);
-        assert_eq!(1, 1);
     }
 
     #[test]
@@ -108,7 +102,7 @@ mod tests {
 
     #[test]
     fn correctly_parses_basic_file() {
-        let res = fetch_file("res/demo.properties").unwrap();
+        let res = parse_file("res/demo.properties").unwrap();
         let mut ex_vec: Vec<String> = Vec::new();
         for el in ["this", "is", "a"] {
             ex_vec.push(el.to_string());
