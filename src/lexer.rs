@@ -48,6 +48,11 @@ pub fn lex(bytes: Vec<u8>) -> Result<Vec<TokenWrapper>, LibError> {
                 index += 1;
                 output.push(TokenWrapper::new(Token::Eol, Span::new(start, start + 1)));
             }
+            b'\r' => {
+                let start = index;
+                index += 1;
+                output.push(TokenWrapper::new(Token::Eol, Span::new(start, start + 1)));
+            }
             b' ' => {
                 let start = index;
                 index += 1;
@@ -94,7 +99,7 @@ fn lex_item(bytes: &[u8], index: &mut usize) -> Result<TokenWrapper, LibError> {
         *index += 1;
 
         while *index < bytes.len()
-            && (bytes[*index].is_ascii_alphanumeric() || bytes[*index] == b'#')
+            && (bytes[*index].is_ascii_alphanumeric() || bytes[*index] == b'#' || bytes[*index] == b'_')
         {
             *index += 1;
         }
